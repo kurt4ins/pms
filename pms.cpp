@@ -8,19 +8,19 @@ void Guest::setFirstName(std::string name) {
 }
 
 void Guest::setSecondName(std::string name) {
-    secondName = name;
+    this->secondName = name;
 }
 
 void Guest::setPhone(std::string phoneNum) {
-    phone = phoneNum;
+    this->phone = phoneNum;
 }
 
 void Guest::setPassport(u_int64_t passportNum) {
-    passport = passportNum;
+    this->passport = passportNum;
 }
 
 std::string Guest::getFullName(){
-    return firstName + secondName;
+    return this->firstName + this->secondName;
 }
 
 void Guest::showInfo() {
@@ -56,12 +56,15 @@ Guest::Guest(
     this->loyalPoint = loyalPoint;
 }
 
-void DateTime::string_to_date(std::string str) {
-    std::stringstream ss(str);
+DateTime::DateTime(int64 sec = 0): sec(sec) {};
+
+DateTime::DateTime(int dd, int mm, int yy, int hour, int min, int sec):
+    sec((yy - 1970) * 31536000 + (mm - 1) * 2592000 + (dd - 1) * 86400 + hour * 3600 + min * 60 + sec) {};
+
+void DateTime::str_to_date(std::string str) {
 
 }
 
-void DateTime::date_to_string(DateTime) {
-    
-
+std::string DateTime::date_to_str(DateTime) {
+    return ("%02d-%02d-%04d %02d:%02d");
 }

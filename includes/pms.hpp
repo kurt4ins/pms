@@ -2,6 +2,8 @@
 #pragma once
 #include <string>
 
+typedef unsigned long long int64;
+
 class Guest {
 private: // модификатор доступа
     u_int64_t id;
@@ -36,14 +38,12 @@ public:
 
 class DateTime {
 private:
-    u_int day;
-    u_int month;
-    u_int year;
-
-    // u_int hour;
-    // u_int minute;
+    int64 sec;
 
 public:
-    void string_to_date(std::string);
-    void date_to_string(DateTime);
+    DateTime(int64 sec = 0);
+    DateTime(int dd, int mm, int yy, int hour = 0, int min = 0, int sec = 0);
+
+    void str_to_date(std::string);
+    std::string date_to_str(DateTime);
 };
