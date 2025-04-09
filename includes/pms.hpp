@@ -44,6 +44,6 @@ public:
     DateTime(int64 sec = 0);
     DateTime(int dd, int mm, int yy, int hour = 0, int min = 0, int sec = 0);
 
-    void str_to_date(std::string);
-    std::string date_to_str(DateTime);
+    DateTime str_to_date();
+    std::string date_to_str();
 };
