@@ -2,11 +2,12 @@
 #include <sstream>
 #include <fstream>
 #include <vector>
-#include "includes/pms.hpp"
+#include "src/DateTime.cpp"
+#include "src/Guest.cpp"
 
 std::vector<Guest> loadGuests() {
-    std::vector<Guest> guests; // создаём массив
-    std::ifstream file("guests.txt"); // создаём файловый поток на чтение
+    std::vector<Guest> guests;
+    std::ifstream file("guests.txt");
     std::string line;
     std::getline(file, line);
     while (std::getline(file, line)) {
@@ -41,7 +42,7 @@ std::vector<Guest> loadGuests() {
 }
 
 int main() {
-    auto guests = loadGuests(); // массив гостей 
+    auto guests = loadGuests();
     for (auto guest : guests) {
         guest.showInfo();
     }

@@ -1,14 +1,11 @@
-// property management system
 #pragma once
 #include <string>
 
-typedef unsigned long long int64;
-
 class Guest {
-private: // модификатор доступа
+private:
     u_int64_t id;
-    std::string firstName; // свойства/поле
-    std::string secondName;
+    std::string firstName;
+    std::string lastName;
     std::string phone;
     std::string email;
     u_int64_t passport;
@@ -20,15 +17,15 @@ public:
     Guest(
         u_int64_t id,
         std::string fname,
-        std::string sname,
+        std::string lname,
         std::string phone,
         std::string email,
         u_int64_t passport,
         std::string date,
         u_int loyalPoint
-    ); //конструктор
+    );
     void setFirstName(std::string);
-    void setSecondName(std::string);
+    void setLastName(std::string);
     void setPhone(std::string);
     void setPassport(u_int64_t);
 
@@ -36,14 +33,3 @@ public:
     void showInfo();
 };
 
-class DateTime {
-private:
-    int64 sec;
-
-public:
-    DateTime(int64 sec = 0);
-    DateTime(int dd, int mm, int yy, int hour = 0, int min = 0, int sec = 0);
-
-    DateTime str_to_date();
-    std::string date_to_str();
-};
