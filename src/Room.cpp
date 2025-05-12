@@ -4,9 +4,6 @@ Room::Room() : roomNumber(0), roomType("Standard"), isOccupied(false) {}
 Room::Room(int number, std::string type) : roomNumber(number), roomType(type), isOccupied(false) {}
 
 Room::~Room() {
-    for (auto& pair : guests) {
-        delete pair.second;
-    }
     guests.clear();
 }
 
@@ -28,7 +25,6 @@ bool Room::removeGuest(u_int64_t id) {
         return false;
     }
     
-    delete guests[id];
     guests.erase(id);
     return true;
 }
