@@ -30,6 +30,10 @@ public:
     void setPassport(u_int64_t);
 
     std::string getFullName();
-    void showInfo();
+    u_int64_t getId();
+    u_int getLoyalPoints();
+
+    void addLoyaltyPoints(u_int points);
+    void showInfo();  
 };
 

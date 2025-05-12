@@ -18,8 +18,20 @@ void Guest::setPassport(u_int64_t passportNum) {
     this->passport = passportNum;
 }
 
-std::string Guest::getFullName(){
+void Guest::addLoyaltyPoints(u_int points) {
+    loyalPoint += points;
+}
+
+std::string Guest::getFullName() {
     return this->firstName + this->lastName;
+}
+
+u_int64_t Guest::getId() {
+    return this->id;
+}
+
+u_int Guest::getLoyalPoints() {
+    return this->loyalPoint; 
 }
 
 void Guest::showInfo() {
