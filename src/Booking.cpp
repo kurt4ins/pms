@@ -1,11 +1,15 @@
 #include "../includes/Booking.hpp"
-#include <algorithm>
 
 u_int64_t Booking::nextBookingId = 1;
 
 Booking::Booking() {}
 
-Booking::~Booking() {}
+Booking::~Booking() {
+    for (auto& pair : bills) {
+        delete pair.second;
+    }
+    bills.clear();
+}
 
 u_int64_t Booking::createReservation(u_int64_t guestId, int roomNumber, time_t checkInDate, time_t checkOutDate) {
     if (rooms.find(roomNumber) == rooms.end()) {
@@ -31,7 +35,7 @@ u_int64_t Booking::createReservation(u_int64_t guestId, int roomNumber, time_t c
     this->roomNumber = roomNumber;
     this->checkInDate = checkInDate;
     this->checkOutDate = checkOutDate;
-    this->status = BookingStatus::RESERVED;
+    this->status = RESERVED;
     
     return newBookingId;
 }
@@ -41,11 +45,11 @@ bool Booking::cancelReservation(u_int64_t bookingId) {
         return false;
     }
     
-    if (status == BookingStatus::CHECKED_IN) {
+    if (status == CHECKED_IN) {
         return false;
     }
     
-    status = BookingStatus::CANCELLED;
+    status = CANCELLED;
     return true;
 }
 
@@ -54,7 +58,7 @@ bool Booking::modifyReservation(u_int64_t bookingId, time_t newCheckInDate, time
         return false;
     }
     
-    if (status != BookingStatus::RESERVED) {
+    if (status != RESERVED) {
         return false;
     }
     
@@ -69,7 +73,7 @@ bool Booking::checkIn(u_int64_t bookingId) {
         return false;
     }
     
-    if (status != BookingStatus::RESERVED) {
+    if (status != RESERVED) {
         return false;
     }
     
@@ -78,7 +82,9 @@ bool Booking::checkIn(u_int64_t bookingId) {
     }
     
     if (rooms[roomNumber]->checkIn(guestId, time(nullptr))) {
-        status = BookingStatus::CHECKED_IN;
+        status = CHECKED_IN;
+        createBill();
+        
         return true;
     }
     
@@ -90,7 +96,7 @@ bool Booking::checkOut(u_int64_t bookingId) {
         return false;
     }
     
-    if (status != BookingStatus::CHECKED_IN) {
+    if (status != CHECKED_IN) {
         return false;
     }
     
@@ -98,8 +104,19 @@ bool Booking::checkOut(u_int64_t bookingId) {
         return false;
     }
     
+    for (const auto& billPair : bills) {
+        if (billPair.second->getRemainingAmount() > 0) {
+            return false;
+        }
+    }
+    
     if (rooms[roomNumber]->checkOut(guestId, time(nullptr))) {
-        status = BookingStatus::CHECKED_OUT;
+        status = CHECKED_OUT;
+        
+        for (auto& billPair : bills) {
+            billPair.second->close();
+        }
+        
         return true;
     }
     
@@ -140,7 +157,7 @@ BookingStatus Booking::getBookingStatus(u_int64_t bookingId) const {
         return status;
     }
 
-    return BookingStatus::CANCELLED;
+    return CANCELLED;
 }
 
 std::vector<u_int64_t> Booking::getGuestBookings(u_int64_t guestId) const {
@@ -197,4 +214,118 @@ std::vector<Room*> Booking::getVacantRooms() const {
     }
     
     return vacantRooms;
+}
+
+u_int64_t Booking::createBill() {
+    Bill* newBill = new Bill(bookingId, guestId);
+    u_int64_t billId = newBill->getBillId();
+    bills[billId] = newBill;
+    
+    int stayDuration = static_cast<int>((checkOutDate - checkInDate) / 86400);
+    double roomRate = 5000.0; //впоследствии будет добавлена возможность изменения стоимости номера
+    newBill->addItem("Проживание в номере " + std::to_string(roomNumber), roomRate * stayDuration);
+    
+    return billId;
+}
+
+Bill* Booking::getBill(u_int64_t billId) {
+    if (bills.find(billId) != bills.end()) {
+        return bills[billId];
+    }
+    return nullptr;
+}
+
+bool Booking::deleteBill(u_int64_t billId) {
+    if (bills.find(billId) == bills.end()) {
+        return false;
+    }
+    
+    if (!bills[billId]->getIsClosed()) {
+        delete bills[billId];
+        bills.erase(billId);
+        return true;
+    }
+    
+    return false;
+}
+
+std::vector<Bill*> Booking::getAllBills() const {
+    std::vector<Bill*> allBills;
+    for (const auto& billPair : bills) {
+        allBills.push_back(billPair.second);
+    }
+    return allBills;
+}
+
+bool Booking::addBillItem(u_int64_t billId, const std::string& description, double amount) {
+    Bill* bill = getBill(billId);
+    if (bill == nullptr) {
+        return false;
+    }
+    
+    bill->addItem(description, amount);
+    return true;
+}
+
+bool Booking::removeBillItem(u_int64_t billId, int itemIndex) {
+    Bill* bill = getBill(billId);
+    if (bill == nullptr) {
+        return false;
+    }
+    
+    return bill->removeItem(itemIndex);
+}
+
+bool Booking::payBill(u_int64_t billId) {
+    Bill* bill = getBill(billId);
+    if (bill == nullptr) {
+        return false;
+    }
+    
+    return bill->payAll();
+}
+
+bool Booking::payBillItem(u_int64_t billId, int itemIndex) {
+    Bill* bill = getBill(billId);
+    if (bill == nullptr) {
+        return false;
+    }
+    
+    return bill->payItem(itemIndex);
+}
+
+bool Booking::payBillAmount(u_int64_t billId, double amount) {
+    Bill* bill = getBill(billId);
+    if (bill == nullptr) {
+        return false;
+    }
+    
+    return bill->payAmount(amount);
+}
+
+double Booking::getTotalBillAmount(u_int64_t billId) const {
+    auto it = bills.find(billId);
+    if (it == bills.end()) {
+        return 0.0;
+    }
+    
+    return it->second->getTotalAmount();
+}
+
+double Booking::getRemainingBillAmount(u_int64_t billId) const {
+    auto it = bills.find(billId);
+    if (it == bills.end()) {
+        return 0.0;
+    }
+    
+    return it->second->getRemainingAmount();
+}
+
+std::string Booking::generateBillSummary(u_int64_t billId) const {
+    auto it = bills.find(billId);
+    if (it == bills.end()) {
+        return "Счет не найден";
+    }
+    
+    return it->second->generateBillSummary();
 }

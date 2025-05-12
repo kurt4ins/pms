@@ -5,6 +5,7 @@
 #include <ctime>
 #include "Room.hpp"
 #include "Guest.hpp"
+#include "Bill.hpp"
 
 enum BookingStatus {
     RESERVED,
@@ -24,6 +25,7 @@ private:
     static u_int64_t nextBookingId;
     
     std::map<int, Room*> rooms;
+    std::map<u_int64_t, Bill*> bills;
     
 public:
     Booking();
@@ -48,4 +50,20 @@ public:
     int getOccupancyRate(time_t date) const;
     std::vector<Room*> getOccupiedRooms() const;
     std::vector<Room*> getVacantRooms() const;
+
+    u_int64_t createBill();
+    Bill* getBill(u_int64_t billId);
+    bool deleteBill(u_int64_t billId);
+    std::vector<Bill*> getAllBills() const;
+
+    bool addBillItem(u_int64_t billId, const std::string& description, double amount);
+    bool removeBillItem(u_int64_t billId, int itemIndex);
+
+    bool payBill(u_int64_t billId);
+    bool payBillItem(u_int64_t billId, int itemIndex);
+    bool payBillAmount(u_int64_t billId, double amount);
+
+    double getTotalBillAmount(u_int64_t billId) const;
+    double getRemainingBillAmount(u_int64_t billId) const;
+    std::string generateBillSummary(u_int64_t billId) const;
 };
