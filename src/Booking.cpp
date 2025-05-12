@@ -329,3 +329,56 @@ std::string Booking::generateBillSummary(u_int64_t billId) const {
     
     return it->second->generateBillSummary();
 }
+
+void Booking::addResource(Resource* resource) {
+    if (resource != nullptr) {
+        resources[resource->getId()] = resource;
+    }
+}
+
+std::vector<Resource*> Booking::getAvailableResources(time_t startTime, time_t endTime) const {
+    std::vector<Resource*> available;
+    
+    for (const auto& pair : resources) {
+        if (pair.second->isAvailable() && pair.second->checkAvailability(startTime, endTime)) {
+            available.push_back(pair.second);
+        }
+    }
+    
+    return available;
+}
+
+u_int64_t Booking::bookResource(u_int64_t resourceId, time_t startTime, time_t endTime) {
+    if (status != CHECKED_IN) {
+        return 0;
+    }
+    
+    auto it = resources.find(resourceId);
+    if (it == resources.end()) {
+        return 0;
+    }
+    
+    return it->second->book(guestId, startTime, endTime);
+}
+
+bool Booking::addResourceToBill(u_int64_t billId, u_int64_t resourceId, u_int64_t bookingId) {
+    Bill* bill = getBill(billId);
+    if (bill == nullptr) {
+        return false;
+    }
+    
+    auto it = resources.find(resourceId);
+    if (it == resources.end()) {
+        return false;
+    }
+    
+    Resource* resource = it->second;
+    double charge = resource->calculateCharge(bookingId);
+    
+    if (charge <= 0.0) {
+        return false;
+    }
+    
+    bill->addItem("Услуга: " + resource->getName(), charge);
+    return true;
+}

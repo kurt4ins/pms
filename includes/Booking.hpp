@@ -6,6 +6,7 @@
 #include "Room.hpp"
 #include "Guest.hpp"
 #include "Bill.hpp"
+#include "Resource.hpp"
 
 enum BookingStatus {
     RESERVED,
@@ -26,6 +27,7 @@ private:
     
     std::map<int, Room*> rooms;
     std::map<u_int64_t, Bill*> bills;
+    std::map<u_int64_t, Resource*> resources;
     
 public:
     Booking();
@@ -66,4 +68,9 @@ public:
     double getTotalBillAmount(u_int64_t billId) const;
     double getRemainingBillAmount(u_int64_t billId) const;
     std::string generateBillSummary(u_int64_t billId) const;
+
+    void addResource(Resource* resource);
+    std::vector<Resource*> getAvailableResources(time_t startTime, time_t endTime) const;
+    u_int64_t bookResource(u_int64_t resourceId, time_t startTime, time_t endTime);
+    bool addResourceToBill(u_int64_t billId, u_int64_t resourceId, u_int64_t bookingId);
 };
