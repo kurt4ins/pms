@@ -106,29 +106,6 @@ u_int Room::getLoyaltyPoints(u_int64_t guestId) const {
     return it->second->getLoyalPoints();
 }
 
-bool Room::addInteraction(u_int64_t guestId, const std::string& interaction) {
-    for (auto it = visitHistory.rbegin(); it != visitHistory.rend(); ++it) {
-        if (it->guestId == guestId && it->checkOutDate == 0) {
-            it->interactions.push_back(interaction);
-            return true;
-        }
-    }
-    
-    return false;
-}
-
-std::vector<std::string> Room::getInteractions(u_int64_t guestId) const {
-    std::vector<std::string> interactions;
-    
-    for (const auto& visit : visitHistory) {
-        if (visit.guestId == guestId) {
-            interactions.insert(interactions.end(), visit.interactions.begin(), visit.interactions.end());
-        }
-    }
-    
-    return interactions;
-}
-
 bool Room::isRoomOccupied() const {
     return isOccupied;
 }

@@ -23,7 +23,7 @@ void Guest::addLoyaltyPoints(u_int points) {
 }
 
 std::string Guest::getFullName() {
-    return this->firstName + this->lastName;
+    return this->firstName + " " + this->lastName;
 }
 
 u_int64_t Guest::getId() {

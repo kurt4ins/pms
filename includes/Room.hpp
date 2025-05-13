@@ -40,9 +40,6 @@ public:
     bool addLoyaltyPoints(u_int64_t guestId, u_int points);
     u_int getLoyaltyPoints(u_int64_t guestId) const;
     
-    bool addInteraction(u_int64_t guestId, const std::string& interaction);
-    std::vector<std::string> getInteractions(u_int64_t guestId) const;
-    
     bool isRoomOccupied() const;
     int getRoomNumber() const;
     std::string getRoomType() const;

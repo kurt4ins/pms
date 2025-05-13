@@ -53,21 +53,6 @@ bool Booking::cancelReservation(u_int64_t bookingId) {
     return true;
 }
 
-bool Booking::modifyReservation(u_int64_t bookingId, time_t newCheckInDate, time_t newCheckOutDate) {
-    if (this->bookingId != bookingId) {
-        return false;
-    }
-    
-    if (status != RESERVED) {
-        return false;
-    }
-    
-    this->checkInDate = newCheckInDate;
-    this->checkOutDate = newCheckOutDate;
-    
-    return true;
-}
-
 bool Booking::checkIn(u_int64_t bookingId) {
     if (this->bookingId != bookingId) {
         return false;
@@ -174,22 +159,6 @@ std::vector<u_int64_t> Booking::getRoomBookings(int roomNumber) const {
         bookings.push_back(bookingId);
     }
     return bookings;
-}
-
-int Booking::getOccupancyRate(time_t date) const {
-    int totalRooms = rooms.size();
-    if (totalRooms == 0) {
-        return 0;
-    }
-    
-    int occupiedRooms = 0;
-    for (const auto& room : rooms) {
-        if (room.second->isRoomOccupied()) {
-            occupiedRooms++;
-        }
-    }
-    
-    return (occupiedRooms * 100) / totalRooms;
 }
 
 std::vector<Room*> Booking::getOccupiedRooms() const {
