@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <iomanip>
 #include <ctime>
 #include "includes/Booking.hpp"
 #include "includes/Room.hpp"
@@ -58,30 +59,26 @@ int main() {
     standardRoom->addGuest(ivanov);
     businessRoom->addGuest(petrova);
     
-    // ===== Бронирование номеров =====
-    printHeader("БРОНИРОВАНИЕ НОМЕРОВ");
+
+    printHeader("СИСТЕМА БРОНИРОВАНИЯ");
     
-    // Создаем объекты бронирования
-    Booking* booking1 = new Booking();
-    Booking* booking2 = new Booking();
+    // Создаем систему бронирования
+    Booking* bookingSystem = new Booking();
     
     // Добавляем комнаты в систему бронирования
-    booking1->addRoom(standardRoom);
-    booking1->addRoom(businessRoom);
-    booking1->addRoom(luxuryRoom);
-    
-    booking2->addRoom(standardRoom);
-    booking2->addRoom(businessRoom);
-    booking2->addRoom(luxuryRoom);
+    bookingSystem->addRoom(standardRoom);
+    bookingSystem->addRoom(businessRoom);
+    bookingSystem->addRoom(luxuryRoom);
     
     // Добавляем ресурсы в систему бронирования
-    booking1->addResource(spa);
-    booking1->addResource(gym);
-    booking1->addResource(restaurant);
+    bookingSystem->addResource(spa);
+    bookingSystem->addResource(gym);
+    bookingSystem->addResource(restaurant);
     
-    booking2->addResource(spa);
-    booking2->addResource(gym);
-    booking2->addResource(restaurant);
+    std::cout << "Создана единая система управления отелем" << std::endl;
+    
+
+    printHeader("БРОНИРОВАНИЕ НОМЕРОВ");
     
     // Устанавливаем даты заезда и выезда
     time_t now = time(nullptr);
@@ -95,11 +92,9 @@ int main() {
     time_t checkOutPetrova = now + (10 * 24 * 60 * 60);
     
     // Создаем бронирования
-    u_int64_t reservationIvanov = booking1->createReservation(
-        ivanov->getId(), standardRoom->getRoomNumber(), checkInIvanov, checkOutIvanov);
+    u_int64_t reservationIvanov = bookingSystem->createReservation(ivanov->getId(), standardRoom->getRoomNumber(), checkInIvanov, checkOutIvanov);
     
-    u_int64_t reservationPetrova = booking2->createReservation(
-        petrova->getId(), businessRoom->getRoomNumber(), checkInPetrova, checkOutPetrova);
+    u_int64_t reservationPetrova = bookingSystem->createReservation(petrova->getId(), businessRoom->getRoomNumber(), checkInPetrova, checkOutPetrova);
     
     std::cout << "Созданы бронирования:" << std::endl;
     std::cout << "- Бронирование для " << ivanov->getFullName() << ": " << std::endl
@@ -107,42 +102,35 @@ int main() {
               << "  Комната: " << standardRoom->getRoomNumber() << " (" << standardRoom->getRoomType() << ")" << std::endl
               << "  Дата заезда: " << getTimeString(checkInIvanov) << std::endl
               << "  Дата выезда: " << getTimeString(checkOutIvanov) << std::endl
-              << "  Статус: " << booking1->getBookingStatus(reservationIvanov) << " (0=RESERVED, 1=CHECKED_IN)" << std::endl;
+              << "  Статус: " << bookingSystem->getBookingStatus(reservationIvanov) << " (0=RESERVED, 1=CHECKED_IN)" << std::endl;
               
     std::cout << "\n- Бронирование для " << petrova->getFullName() << ": " << std::endl
               << "  ID: " << reservationPetrova << std::endl
               << "  Комната: " << businessRoom->getRoomNumber() << " (" << businessRoom->getRoomType() << ")" << std::endl
               << "  Дата заезда: " << getTimeString(checkInPetrova) << std::endl
               << "  Дата выезда: " << getTimeString(checkOutPetrova) << std::endl
-              << "  Статус: " << booking2->getBookingStatus(reservationPetrova) << " (0=RESERVED, 1=CHECKED_IN)" << std::endl;
+              << "  Статус: " << bookingSystem->getBookingStatus(reservationPetrova) << " (0=RESERVED, 1=CHECKED_IN)" << std::endl;
     
     // Проверка доступности номеров
-    std::cout << "\nДоступные номера на текущие даты:" << std::endl;
-    std::vector<Room*> availableRooms = booking1->getAvailableRooms(now, now + (24 * 60 * 60));
+    std::cout << "\nДоступные номера на текущие даты (" << getTimeString(now) << " — " << getTimeString(now + (24 * 60 * 60)) << "):" << std::endl;
+    std::vector<Room*> availableRooms = bookingSystem->getAvailableRooms(now, now + (24 * 60 * 60));
     for (size_t i = 0; i < availableRooms.size(); i++) {
         std::cout << "- Комната " << availableRooms[i]->getRoomNumber() 
                   << ": " << availableRooms[i]->getRoomType() << std::endl;
     }
     
-    // ===== Заселение гостя =====
+
     printHeader("ЗАСЕЛЕНИЕ ГОСТЯ");
     
-    if (booking1->checkIn(reservationIvanov)) {
+    if (bookingSystem->checkIn(reservationIvanov)) {
         std::cout << "Гость " << ivanov->getFullName() << " успешно заселен в комнату " 
                   << standardRoom->getRoomNumber() << " (" << standardRoom->getRoomType() << ")" << std::endl;
         
-        // Записываем события взаимодействия с гостем (в визит-историю)
-        // В текущем визите гостя добавляем записи о взаимодействиях
-        std::cout << "\nЗаписываем взаимодействия с гостем:" << std::endl;
-        
-        // Создаем записи о взаимодействиях в истории посещений (подход отличается от оригинального)
-        std::cout << "- Выдан ключ от номера" << std::endl;
-        std::cout << "- Объяснены правила проживания в отеле" << std::endl;
-        std::cout << "- Выдана карта города и список достопримечательностей" << std::endl;
+    
         
         // Проверка статуса бронирования
         std::cout << "\nНовый статус бронирования: " 
-                  << booking1->getBookingStatus(reservationIvanov) 
+                  << bookingSystem->getBookingStatus(reservationIvanov) 
                   << " (1=CHECKED_IN)" << std::endl;
     } else {
         std::cout << "Не удалось заселить гостя " << ivanov->getFullName() << std::endl;
@@ -159,84 +147,73 @@ int main() {
     time_t gymStartTime = now + (2 * 24 * 60 * 60);
     time_t gymEndTime = gymStartTime + (90 * 60);
     
-    u_int64_t spaBookingId = booking1->bookResource(spa->getId(), spaStartTime, spaEndTime);
-    u_int64_t gymBookingId = booking1->bookResource(gym->getId(), gymStartTime, gymEndTime);
+    u_int64_t spaBookingId = bookingSystem->bookResource(reservationIvanov, spa->getId(), spaStartTime, spaEndTime);
+    u_int64_t gymBookingId = bookingSystem->bookResource(reservationIvanov, gym->getId(), gymStartTime, gymEndTime);
     
     std::cout << "Забронированы услуги для " << ivanov->getFullName() << ":" << std::endl;
-    std::cout << "- " << spa->getName() << ": " << getTimeString(spaStartTime) 
-              << " (ID бронирования: " << spaBookingId << ")" << std::endl;
-    std::cout << "- " << gym->getName() << ": " << getTimeString(gymStartTime) 
-              << " (ID бронирования: " << gymBookingId << ")" << std::endl;
-    
-    // Проверяем доступные услуги на завтра
-    time_t tomorrowStart = now + (24 * 60 * 60);
-    time_t tomorrowEnd = tomorrowStart + (24 * 60 * 60);
-    
-    std::cout << "\nДоступные услуги на завтра:" << std::endl;
-    std::vector<Resource*> availableResources = booking1->getAvailableResources(tomorrowStart, tomorrowEnd);
-    for (size_t i = 0; i < availableResources.size(); i++) {
-        std::cout << "- " << availableResources[i]->getName() << std::endl;
-    }
-    
-    // ===== Счет за проживание =====
+    std::cout << "- " << spa->getName() << ": " << getTimeString(spaStartTime) << " (ID бронирования: " << spaBookingId << ")" << std::endl;
+    std::cout << "- " << gym->getName() << ": " << getTimeString(gymStartTime) << " (ID бронирования: " << gymBookingId << ")" << std::endl;
+
+
     printHeader("СЧЕТ ЗА ПРОЖИВАНИЕ");
     
-    // При заселении автоматически создается счет
-    std::vector<Bill*> allBills = booking1->getAllBills();
+    // Получаем счета для бронирования Иванова
+    std::vector<Bill*> ivanovBills = bookingSystem->getBookingBills(reservationIvanov);
     
-    if (!allBills.empty()) {
-        u_int64_t billId = allBills[0]->getBillId();
+    if (!ivanovBills.empty()) {
+        u_int64_t billId = ivanovBills[0]->getBillId();
         
         // Добавляем бронирования услуг в счет
-        booking1->addResourceToBill(billId, spa->getId(), spaBookingId);
-        booking1->addResourceToBill(billId, gym->getId(), gymBookingId);
+        bookingSystem->addResourceToBill(billId, spa->getId(), spaBookingId);
+        bookingSystem->addResourceToBill(billId, gym->getId(), gymBookingId);
         
         // Добавляем дополнительные услуги
-        booking1->addBillItem(billId, "Мини-бар", 1200.0);
-        booking1->addBillItem(billId, "Завтрак", 800.0);
+        bookingSystem->addBillItem(billId, "Мини-бар", 1200.0);
+        bookingSystem->addBillItem(billId, "Завтрак", 800.0);
         
         // Получаем и выводим счет
         std::cout << "Счет для гостя " << ivanov->getFullName() << ":" << std::endl;
-        std::cout << booking1->generateBillSummary(billId) << std::endl;
+        std::cout << bookingSystem->generateBillSummary(billId) << std::endl;
         
         // Частичная оплата счета
-        double totalAmount = booking1->getTotalBillAmount(billId);
-        booking1->payBillAmount(billId, totalAmount / 2);
+        double totalAmount = bookingSystem->getTotalBillAmount(billId);
+        bookingSystem->payBillAmount(billId, totalAmount / 2);
         
-        std::cout << "\nВнесена частичная оплата. Остаток к оплате: " 
-                  << booking1->getRemainingBillAmount(billId) << " руб." << std::endl;
+        std::cout << "\nВнесена частичная оплата. Остаток к оплате: " << bookingSystem->getRemainingBillAmount(billId) << " руб." << std::endl;
     } else {
         std::cout << "Счет не найден!" << std::endl;
     }
     
-    // ===== Выселение гостя =====
+
     printHeader("ВЫСЕЛЕНИЕ ГОСТЯ");
     
     // Сначала полностью оплачиваем счет
-    if (!allBills.empty()) {
-        u_int64_t billId = allBills[0]->getBillId();
-        booking1->payBill(billId);
-        std::cout << "Счет полностью оплачен. Остаток: " 
-                  << booking1->getRemainingBillAmount(billId) << " руб." << std::endl;
+    if (!ivanovBills.empty()) {
+        u_int64_t billId = ivanovBills[0]->getBillId();
+        bookingSystem->payBill(billId);
+        std::cout << "Счет полностью оплачен. Остаток: " << bookingSystem->getRemainingBillAmount(billId) << " руб." << std::endl;
     }
     
     // Теперь выселяем гостя
-    if (booking1->checkOut(reservationIvanov)) {
-        std::cout << "\nГость " << ivanov->getFullName() << " успешно выселен из комнаты " 
-                  << standardRoom->getRoomNumber() << std::endl;
+    if (bookingSystem->checkOut(reservationIvanov)) {
+        std::cout << "\nГость " << ivanov->getFullName() << " успешно выселен из комнаты " << standardRoom->getRoomNumber() << std::endl;
         
         // Проверка статуса бронирования
-        std::cout << "Новый статус бронирования: " 
-                  << booking1->getBookingStatus(reservationIvanov) 
-                  << " (2=CHECKED_OUT)" << std::endl;
+        std::cout << "Новый статус бронирования: " << bookingSystem->getBookingStatus(reservationIvanov) << " (2=CHECKED_OUT)" << std::endl;
                   
         // Проверка начисления бонусных баллов
-        std::cout << "\nБонусные баллы гостя после выселения: " 
-                  << ivanov->getLoyalPoints() << std::endl;
+        std::cout << "\nБонусные баллы гостя после выселения: " << ivanov->getLoyalPoints() << std::endl;
     } else {
-        std::cout << "Не удалось выселить гостя " << ivanov->getFullName() 
-                  << ". Возможно, не все счета оплачены." << std::endl;
+        std::cout << "Не удалось выселить гостя " << ivanov->getFullName() << ". Возможно, не все счета оплачены." << std::endl;
     }
+    
+
+    printHeader("СТАТИСТИКА СИСТЕМЫ");
+    
+    std::cout << "Всего бронирований в системе: " << bookingSystem->getAllBookings().size() << std::endl;
+    
+    std::vector<u_int64_t> petrovaBookings = bookingSystem->getGuestBookings(petrova->getId());
+    std::cout << "Количество бронирований для " << petrova->getFullName() << ": " << petrovaBookings.size() << std::endl;
     
     // Освобождаем память
     delete standardRoom;
@@ -247,8 +224,7 @@ int main() {
     delete restaurant;
     delete ivanov;
     delete petrova;
-    delete booking1;
-    delete booking2;
+    delete bookingSystem;
     
     return 0;
 }
